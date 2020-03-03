@@ -1,90 +1,56 @@
-import React, { Component } from "react";
+import React from "react";
+import { Provider } from "react-redux";
+import store from "./store";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      text: ""
-    };
+import { createBrowserHistory } from "history";
+import { Router, Route, Switch } from "react-router-dom";
 
-    this.object = this.object.bind(this);
-  }
+import "./App.css";
 
-  showFile = async e => {
-    e.preventDefault();
-    const reader = new FileReader();
-    reader.onload = async e => {
-      this.setState({
-        text: e.target.result
-      });
-    };
-    reader.readAsText(e.target.files[0]);
-  };
+import "./assets/css/nucleo-icons.css";
+import "./assets/scss/black-dashboard-pro-react.scss?v=1.0.0";
+import "./assets/demo/demo.css";
+import "react-notification-alert/dist/animate.css";
 
-  componentWillUpdate(nextProps, nextState) {
-    const { text } = nextState;
+import Index from "./pages/index";
+import Login from "./pages/login";
+import Alert from "./layout/alert";
+import Navbar from "./layout/nabvar";
+import PrivateRoute from "./routing/privateRoute";
+import Home from "./pages/home.js";
+import Register from "./pages/register";
+import Footer from "./layout/footer";
 
-    if (this.state.text !== nextState) {
-      console.log(text);
-      alert(text);
+const hist = createBrowserHistory();
 
-      var text1 = text;
-      var aux = "";
-
-      var number = 0;
-      for (const c of text1) {
-        number += 1;
-        if (Number(c)) {
-          //cortamos hasta el primer numero
-          text1 = text1.substring(number - 1, text1.length);
-          //tomamos el primer numero hasta la coma
-          aux = text1.split(",")[0];
-
-          if (Number(aux)) {
-            this.object(text1);
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  object(text1) {
-    var aux = "";
-
-    var number = 0;
-    for (const c of text1) {
-      number += 1;
-      if (Number(c)) {
-        //tomamos el primer numero hasta la coma
-        aux = text1.split(",")[0];
-
-        if (Number(aux)) {
-          console.log(text1);
-          console.log(aux);
-
-          //remplazamos el string encontrado con ''
-          text1 = text1.replace(aux, "");
-
-          //eliminamos la ','
-          text1 = text1.substring(1, text1.length);
-          console.log(text1);
-
-          number = 0;
-        }
-
-        break;
-      }
-    }
-  }
-
-  render = () => {
+class App extends React.Component {
+  render() {
     return (
-      <div>
-        <input type="file" onChange={e => this.showFile(e)} />
-      </div>
+      <Provider store={store}>
+        <Router history={hist}>
+          <Alert />
+          <Navbar />
+          <Switch>
+            <Route path="/" exact render={props => <Index {...props} />} />
+            <Route path="/login" exact render={props => <Login {...props} />} />
+            <Route
+              path="/register"
+              exact
+              render={props => <Register {...props} />}
+            />
+            <Route
+              path="/register"
+              exact
+              render={props => <Register {...props} />}
+            />
+
+            <PrivateRoute path="/user/home" exact component={Home} />
+          </Switch>
+        </Router>
+        <Footer />
+      </Provider>
     );
-  };
+  }
 }
 
 export default App;
