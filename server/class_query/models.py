@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 import os
 
+
 class Record(models.Model):
     nrc = models.TextField(max_length=7)
     sr = models.CharField()
@@ -31,6 +32,7 @@ class Record(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     level = models.TextField(max_length=5)
+
 
 class FileUpload(models.Model):
     def get_upload_location(self, filename):
