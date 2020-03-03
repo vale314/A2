@@ -1,4 +1,6 @@
 from django.db import models
+import uuid
+import os
 
 class Record(models.Model):
     nrc = models.TextField(max_length=7)
@@ -29,3 +31,15 @@ class Record(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     level = models.TextField(max_length=5)
+
+class FileUpload(models.Model):
+    def get_upload_location(self, filename):
+        ext = filename.split('.')[-1]
+        filename = "{}.{}".format(uuid.uuid4(), ext)
+        return os.path.join('files', filename)
+
+    uploaded_at = models.DateTimeField(auto_now=True)
+    file = models.FileField(upload_to='files/')
+    uploader = models.ForeignKey('django.contrib.auth.User',
+                                 on_delete=models.DO_NOTHING)
+    total_records = models.IntegerField()
