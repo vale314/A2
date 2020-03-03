@@ -1,6 +1,6 @@
 from django.db import models
 
-class Class(models.Model):
+class Record(models.Model):
     nrc = models.TextField(max_length=7)
     sr = models.CharField()
     # all rows are padded to 50 chars so...
