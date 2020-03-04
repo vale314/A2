@@ -7,7 +7,7 @@ admin_list = viewsets.AdminViewSet.as_view({
     'post': 'create'
 })
 
-admin_detail = SnippetViewSet.as_view({
+admin_detail = viewsets.AdminViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
