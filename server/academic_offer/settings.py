@@ -130,3 +130,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+# Don't append slash to routes
+
+APPEND_SLASH = False
