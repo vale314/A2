@@ -2,10 +2,11 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import api_view
 from rest_framework import status
 
 from class_query.models import FileUpload
-from class_query.serializers import UserSerializer, FileUploadSerializer
+from class_query.serializers import UserSerializer, FileUploadSerializer, RecordSerializer
 
 
 class FileUploadList(APIView):
@@ -22,3 +23,12 @@ class FileUploadList(APIView):
         file_uploads = FileUpload.objects.all()
         serializer = FileUploadSerializer(file_uploads, many=True)
         return Response(serializer.data)
+
+
+@api_view(['POST'])
+def search_records(request):
+    """
+    Record search
+    """
+    if request.method == 'POST':
+        records = Record.objects.all
