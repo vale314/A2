@@ -2,6 +2,7 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import api_view
 from rest_framework import status
 
 from class_query.models import FileUpload
@@ -19,5 +20,16 @@ class FileUploadList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
-        serializer = FileUploadSerializer(data=request.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        file_uploads = FileUpload.objects.all()
+        serializer = FileUploadSerializer(file_uploads, many=True)
+        return Response(serializer.data)
+
+
+"""
+@api_view(['POST'])
+def search_records(request):
+    Record search
+    if request.method == 'POST':
+        records = Record.objects.all
+
+"""

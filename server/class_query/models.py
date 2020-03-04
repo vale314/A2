@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 import uuid
 import os
 
@@ -44,4 +45,47 @@ class FileUpload(models.Model):
     uploaded_at = models.DateTimeField(auto_now=True)
     file = models.FileField(upload_to='files/')
     uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    total_records = models.IntegerField()
+
+def upload_file(sender, instance, **kwargs):
+    rows = []
+    with open(instance.file.url, 'r', encoding='latin1') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            # skip this row if it does not have a NRC
+            if not (len(row) and row[0] and row[0] != 'NRC'):
+                continue
+            new_record = Record(**{
+                'nrc': row[0],
+                'st': row[1],
+                'department': row[2],
+                'career': row[3],
+                'subject_key': row[4],
+                'subject_name': row[5],
+                'theory_hours': row[6],
+                'lab_hours': row[7],
+                'section': row[8],
+                'credits': row[9],
+                'places': row[10],
+                'places_taken': row[11],
+                'places_available': row[12],
+                'start_time': row[13],
+                'end_time': row[14],
+                'monday': bool(row[15]),
+                'tuesday': bool(row[16]),
+                'wednesday': bool(row[17]),
+                'thursday': bool(row[18]),
+                'friday': bool(row[19]),
+                'saturday': bool(row[20]),
+                'building': row[21],
+                'classroom': row[22],
+                'teacher_raw': row[23],
+                'start_date': row[24],
+                'end_date': row[25],
+                'level': row[26],
+            })
+            new_record.save()
+
+"""
+post_save signal for FileUpload that calls upload_file
+"""
+post_save.connect(upload_file, sender=FileUpload)
