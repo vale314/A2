@@ -1,11 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
 import uuid
 import os
 
 
 class Record(models.Model):
     nrc = models.TextField(max_length=7)
-    sr = models.CharField()
+    sr = models.CharField(max_length=3)
     # all rows are padded to 50 chars so...
     department = models.TextField(max_length=50)
     career_code = models.TextField(max_length=7)
@@ -42,6 +43,5 @@ class FileUpload(models.Model):
 
     uploaded_at = models.DateTimeField(auto_now=True)
     file = models.FileField(upload_to='files/')
-    uploader = models.ForeignKey('django.contrib.auth.User',
-                                 on_delete=models.DO_NOTHING)
+    uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     total_records = models.IntegerField()
