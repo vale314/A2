@@ -19,5 +19,6 @@ class FileUploadList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
-        serializer = FileUploadSerializer(data=request.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        file_uploads = FileUpload.objects.all()
+        serializer = FileUploadSerializer(file_uploads, many=True)
+        return Response(serializer.data)
