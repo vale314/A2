@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 
 from class_query.models import FileUpload
-from class_query.serializers import UserSerializer, FileUploadSerializer, RecordSerializer
+from class_query.serializers import UserSerializer, FileUploadSerializer
 
 
 class FileUploadList(APIView):
@@ -25,10 +25,11 @@ class FileUploadList(APIView):
         return Response(serializer.data)
 
 
+"""
 @api_view(['POST'])
 def search_records(request):
-    """
     Record search
-    """
     if request.method == 'POST':
         records = Record.objects.all
+
+"""
