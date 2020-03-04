@@ -25,19 +25,6 @@ class Footer extends React.Component {
     console.log();
     return (
       <Fragment>
-        <Button
-          className="btn d-block"
-          style={{
-            zIndex: 9999,
-            position: "fixed",
-            left: "2rem",
-            bottom: "2.5rem",
-            background: "#b0750e"
-          }}
-          onClick={e => this.clickMuted(e)}
-        >
-          <i className="tim-icons icon-triangle-right-17" />
-        </Button>
         <audio src={musicaCasino} loop autoPlay muted={muted}></audio>
         <footer
           className={"footer" + (this.props.default ? " footer-default" : "")}

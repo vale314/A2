@@ -44,7 +44,7 @@ class App extends React.Component {
               render={props => <Register {...props} />}
             />
 
-            <PrivateRoute path="/user/home" exact component={Home} />
+            <PrivateRoute path="/admin/home" exact component={Home} />
           </Switch>
         </Router>
         <Footer />

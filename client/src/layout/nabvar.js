@@ -187,36 +187,12 @@ class navbar extends React.Component {
                   <NavLink
                     onClick={e => this.onClickRoute(e, "/admin/peliculas")}
                   >
-                    Peliculas
+                    Ingresar
                   </NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink onClick={e => this.onClickRoute(e, "/admin/dulces")}>
-                    Dulceria
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink
-                    onClick={e => this.onClickRoute(e, "/admin/funciones")}
-                  >
-                    Funciones
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink
-                    onClick={e => this.onClickRoute(e, "/admin/vendedor")}
-                  >
-                    Vendedor
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink onClick={e => this.onClickRoute(e, "/admin/user")}>
-                    User
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink onClick={e => this.onClickRoute(e, "/admin/admin")}>
-                    Admin
+                    Consultar
                   </NavLink>
                 </NavItem>
               </Nav>
