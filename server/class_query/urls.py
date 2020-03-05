@@ -17,9 +17,10 @@ admin_detail = viewsets.AdminViewSet.as_view({
 
 urlpatterns = [
     path('admin/', admin_list, name='admin-list'),
-    path('admin/<int:pk>/', admin_detail, name='admin-detail'),
-    path('admin/file/', views.FileUploadList.as_view()),
-    # path('admin/file/search', views.search_records)
+    path('admin/<int:pk>', admin_detail, name='admin-detail'),
+    path('admin/file', views.FileUploadList.as_view()),
+    path('admin/file/<int:pk>', views.FileUploadDetail.as_view()),
+    path('record', views.search_records),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
