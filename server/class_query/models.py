@@ -8,7 +8,7 @@ import csv
 
 class Record(models.Model):
     nrc = models.TextField(max_length=7)
-    sr = models.CharField(max_length=3)
+    st = models.CharField(max_length=3)
     # all rows are padded to 50 chars so...
     department = models.TextField(max_length=50)
     career_code = models.TextField(max_length=7)
