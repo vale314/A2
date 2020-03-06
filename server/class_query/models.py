@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, pre_save
 import uuid
 import os
 import csv
-import time
+from django.utils import timezone
 
 
 class Record(models.Model):
@@ -46,11 +46,16 @@ class FileUpload(models.Model):
         return os.path.join('files', filename)
 
     uploaded_at = models.DateTimeField(auto_now=True)
+    finished_parsing_at = models.DateTimeField(null=True)
     file = models.FileField(upload_to=get_upload_location)
     uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
 def parse_file(sender, instance, **kwargs):
+    # only run this if file is not already parsed
+    if (instance.finished_parsing_at):
+        return
     rows = []
+    # TODO: use multiple threads
     with open(instance.file.url, 'r', encoding='latin1') as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
@@ -96,9 +101,14 @@ def parse_file(sender, instance, **kwargs):
             new_record.level = row[26]
 
             new_record.save()
+    # logs datetime at the time file finishes parsing
+    instance.finished_parsing_at = timezone.now()
+    instance.save(update_fields=['finished_parsing_at'])
 
 def delete_previous_records(sender, instance, **kwargs):
-    Record.objects.all().delete()
+    # only deletes objects if new FileUpload
+    if (not instance.pk): 
+        Record.objects.all().delete()
 
 """
 post_save signal for FileUpload that calls upload_file
