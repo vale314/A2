@@ -6,8 +6,11 @@ from django.contrib.auth.models import User
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileUpload
-        read_only_fields = ['uploader']
+        read_only_fields = ['uploader', 'uploaded_at']
         fields = '__all__'
+    
+    def create(self, validated_data):
+        return FileUpload.objects.create(**validated_data)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
