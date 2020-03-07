@@ -1,14 +1,24 @@
 # Server setup
-Python 3 has to be installed as well as `django` and the following python dependencies:
+On a virtual environment install the dependencies listed in `requirements.txt`
 
-`djangorestframework markdown django-filter`
+```
+pip install -r requirements.txt
+```
 
 ## Running the migrations
 In the `server` directory run the following commands:
 
-`$ python3 manage.py makemigrations`
+`$ python manage.py makemigrations`
 
-`$ python3 manage.py migrate`
+`$ python manage.py migrate`
 
 # Running the server
-`$ python3 manage.py runserver`
+`$ python manage.py runserver`
+
+# Creating a super-user
+To authenticate to the admin API you need to provide super-user credentials.
+
+`$ python manage.py createsuperuser`
+
+You will be asked to create credentials, these will be used to authenticate
+to the API.
