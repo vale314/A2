@@ -39,16 +39,22 @@ class Record(models.Model):
     level = models.TextField(max_length=5)
 
 
+class Incoherence(models.Model):
+    records = models.ManyToManyField(Record)
+    incoherent_fields = models.ArrayField()
+    message = models.TextField(max_length=100)
+
+
 class FileUpload(models.Model):
     def get_upload_location(self, filename):
         ext = filename.split('.')[-1]
         filename = "{}.{}".format(uuid.uuid4(), ext)
         return os.path.join('files', filename)
 
-    uploaded_at = models.DateTimeField(auto_now=True)
-    finished_parsing_at = models.DateTimeField(null=True)
-    file = models.FileField(upload_to=get_upload_location)
-    uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    uploaded_at = DateTimeField(auto_now=True)
+    finished_parsing_at = DateTimeField(null=True)
+    file = FileField(upload_to=get_upload_location)
+    uploader = ForeignKey(User, on_delete=DO_NOTHING)
 
 def parse_file(sender, instance, **kwargs):
     # only run this if file is not already parsed
