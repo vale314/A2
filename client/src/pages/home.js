@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import ReactTable from "react-table-6";
 import { Launcher } from "react-chat-window";
 
@@ -6,6 +6,8 @@ import { connect } from "react-redux";
 import { loadUser, clearErrors } from "../actions/authActions";
 import { setAlert } from "../actions/alertActions";
 import { withRouter } from "react-router-dom";
+
+import jsPDF from "jspdf";
 
 // reactstrap components
 import {
@@ -17,18 +19,51 @@ import {
   FormGroup,
   Input,
   Button,
-  CardTitle
+  CardTitle,
+  CardHeader
 } from "reactstrap";
+import { SET_ALERT } from "../actions/types";
 
 class Home extends React.Component {
   _isMounted = true;
   array_json = [];
+  baseState = null;
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      text: null,
+      array_json: [],
+      name_atributes: [
+        "nrc",
+        "st",
+        "departamento",
+        "area",
+        "clave",
+        "materia",
+        "edificio",
+        "aula",
+        "profesor"
+      ],
+      atributes: {
+        nrc: null,
+        st: null,
+        departamento: null,
+        area: null,
+        clave: null,
+        materia: null,
+        edificio: null,
+        aula: null,
+        profesor: null
+      }
+    };
+
+    this.baseState = this.state;
 
     this.iterateObject = this.iterateObject.bind(this);
+    this.viewRender = this.viewRender.bind(this);
+    this.algortitmo = this.algortitmo.bind(this);
+    this.saveDocument = this.saveDocument.bind(this);
   }
 
   componentDidMount() {
@@ -38,6 +73,8 @@ class Home extends React.Component {
 
   showFile = async e => {
     e.preventDefault();
+    this.setState(this.baseState);
+    this.array_json = [];
     const reader = new FileReader();
     reader.onload = async e => {
       this.setState({
@@ -45,7 +82,12 @@ class Home extends React.Component {
         array_json: []
       });
     };
-    reader.readAsText(e.target.files[0]);
+    try {
+      reader.readAsText(e.target.files[0]);
+    } catch (error) {
+      this.setState(this.baseState);
+      setAlert("Error Not Such File", "danger");
+    }
   };
 
   componentWillUpdate(nextProps, nextState) {
@@ -55,6 +97,10 @@ class Home extends React.Component {
       var text1 = text;
       var number = 0;
 
+      console.log(text);
+      if (text === null) {
+        return;
+      }
       for (const c of text1) {
         number += 1;
         if (Number(c)) {
@@ -68,6 +114,9 @@ class Home extends React.Component {
         }
       }
     }
+    if (this.state.atributes !== nextState.atributes) {
+      this.forceUpdate();
+    }
   }
 
   async iterateObject(text1) {
@@ -80,14 +129,18 @@ class Home extends React.Component {
 
     console.log(this.array_json);
 
-    this.setState({
-      array_json: this.array_json
-    });
+    this.setState(
+      {
+        array_json: this.array_json
+      },
+      () => {
+        this.viewRender();
+      }
+    );
   }
 
   object(text1) {
     var aux = new Object();
-    var auxF = "";
 
     //tomamos el primer numero hasta la coma
     aux.nrc = text1.split(",")[0];
@@ -240,26 +293,63 @@ class Home extends React.Component {
 
     //-fecha-L
     //tomamos el primer numero hasta la coma
-    aux.dias = text1.split(",")[0];
+    aux.class_on_monday = text1.split(",")[0];
 
     //remplazamos el string encontrado con ''
-    text1 = text1.replace(aux.dias, "");
+    text1 = text1.replace(aux.class_on_monday, "");
 
     //eliminamos la ','
     text1 = text1.substring(1, text1.length);
 
-    for (let i = 0; i < 5; i++) {
-      //-fech--
-      //tomamos el primer numero hasta la coma
-      auxF = text1.split(",")[0];
-      aux.dias = aux.dias.concat(" ", auxF);
+    //-fecha-M
+    //tomamos el primer numero hasta la coma
+    aux.class_on_tuesday = text1.split(",")[0];
 
-      //remplazamos el string encontrado con ''
-      text1 = text1.replace(auxF, "");
+    //remplazamos el string encontrado con ''
+    text1 = text1.replace(aux.class_on_tuesday, "");
 
-      //eliminamos la ','
-      text1 = text1.substring(1, text1.length);
-    }
+    //eliminamos la ','
+    text1 = text1.substring(1, text1.length);
+
+    //-fecha-I
+    //tomamos el primer numero hasta la coma
+    aux.class_on_wednesday = text1.split(",")[0];
+
+    //remplazamos el string encontrado con ''
+    text1 = text1.replace(aux.class_on_wednesday, "");
+
+    //eliminamos la ','
+    text1 = text1.substring(1, text1.length);
+
+    //-fecha-J
+    //tomamos el primer numero hasta la coma
+    aux.class_on_thursday = text1.split(",")[0];
+
+    //remplazamos el string encontrado con ''
+    text1 = text1.replace(aux.class_on_thursday, "");
+
+    //eliminamos la ','
+    text1 = text1.substring(1, text1.length);
+
+    //-fecha-V
+    //tomamos el primer numero hasta la coma
+    aux.class_on_friday = text1.split(",")[0];
+
+    //remplazamos el string encontrado con ''
+    text1 = text1.replace(aux.class_on_friday, "");
+
+    //eliminamos la ','
+    text1 = text1.substring(1, text1.length);
+
+    //-fecha-S
+    //tomamos el primer numero hasta la coma
+    aux.class_on_saturday = text1.split(",")[0];
+
+    //remplazamos el string encontrado con ''
+    text1 = text1.replace(aux.class_on_saturday, "");
+
+    //eliminamos la ','
+    text1 = text1.substring(1, text1.length);
 
     //-Edifcio
     //tomamos el primer numero hasta la coma
@@ -273,10 +363,10 @@ class Home extends React.Component {
 
     //-Aula
     //tomamos el primer numero hasta la coma
-    aux.edificio = text1.split(",")[0];
+    aux.aula = text1.split(",")[0];
 
     //remplazamos el string encontrado con ''
-    text1 = text1.replace(aux.edificio, "");
+    text1 = text1.replace(aux.aula, "");
 
     //eliminamos la ','
     text1 = text1.substring(1, text1.length);
@@ -370,12 +460,83 @@ class Home extends React.Component {
     this.array_json.push(aux);
   }
 
+  viewRender() {
+    const { name_atributes, text, atributes } = this.state;
+    if (text !== undefined && text !== null) {
+      name_atributes.forEach(i => {
+        atributes[i] = this.algortitmo(i);
+      });
+      this.setState({
+        atributes
+      });
+    }
+  }
+
+  algortitmo(i) {
+    const result = [];
+    const map = new Map();
+    for (const item of this.array_json) {
+      if (!map.has(item[i])) {
+        map.set(item[i], true); // set any value to Map
+        result.push(item);
+      }
+    }
+
+    return result;
+  }
+
+  saveDocument() {
+    const { atributes, name_atributes } = this.state;
+
+    var doc = new jsPDF();
+
+    doc.text(20, 20, "Reporte");
+
+    var numberx = 45;
+    var numbery = 60;
+
+    var incrementox = 45;
+    var incrementoy = 10;
+
+    name_atributes.map((i, page) => {
+      doc.text(40, 40, i);
+
+      atributes[i].map(j => {
+        if (i === "profesor" || i === "materia" || i === "departamento") {
+          numberx = 35;
+          numbery = numbery + incrementoy;
+        } else {
+          if (numberx > 180) {
+            numberx = incrementox;
+            numbery = numbery + incrementoy;
+          }
+        }
+        if (numbery >= 220) {
+          doc.addPage();
+          //reset
+          numberx = 45;
+          numbery = numbery = 60;
+        }
+        doc.text(numberx, numbery, j[i]);
+        numberx = numberx + numberx;
+      });
+      doc.addPage();
+      //reset
+      numberx = 45;
+      numbery = 60;
+    });
+
+    doc.save("Test.pdf");
+  }
+
   render() {
+    const { name_atributes, atributes } = this.state;
+    console.log(atributes);
     return (
       <>
         <div className="content">
           <Row md="12" className="ml-auto mr-auto mt-5">
-            <Col md="12" className="ml-auto mr-auto mt-1">
+            <Col md="5" className="ml-auto mr-auto mt-1">
               <Card>
                 <CardBody className="text-center">
                   <CardTitle tag="h1">Bienvenido </CardTitle>
@@ -384,7 +545,7 @@ class Home extends React.Component {
             </Col>
           </Row>
           <Row>
-            <Col md="12" className="ml-auto mr-auto mt-5">
+            <Col md="4" className="ml-auto mr-auto mt-5">
               <Card>
                 <CardBody>
                   <CardTitle tag="h1"> Ingrese El Documento</CardTitle>
@@ -395,6 +556,37 @@ class Home extends React.Component {
               </Card>
             </Col>
           </Row>
+          {atributes.profesor !== null ? (
+            <Row>
+              <Col md="6" className="ml-auto mr-auto mt-5">
+                <Card>
+                  <CardHeader>
+                    <CardTitle tag="h1"> Datos Principales :</CardTitle>
+                  </CardHeader>
+                  <CardBody>
+                    <div>
+                      {name_atributes.map(i => (
+                        <CardTitle tag="h3" key={i}>
+                          {" "}
+                          {i} : {atributes[i].length}
+                        </CardTitle>
+                      ))}
+                    </div>
+                    <Button
+                      className="btn-fill"
+                      color="primary"
+                      type="submit"
+                      onClick={this.saveDocument}
+                    >
+                      Save Document
+                    </Button>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          ) : (
+            <Fragment></Fragment>
+          )}
           <Row md="12" className="ml-auto mr-auto mt-5">
             <Col md="12">
               <ReactTable
@@ -442,6 +634,13 @@ class Home extends React.Component {
                 showPaginationBottom={false}
                 className="-striped -highlight"
               />
+            </Col>
+          </Row>
+          <Row md="12" className="ml-auto mr-auto mt-5">
+            <Col md="12" className="ml-auto mr-auto mt-5 text-center">
+              <Button className="btn-fill" color="primary" type="submit">
+                Modificar
+              </Button>
             </Col>
           </Row>
         </div>
