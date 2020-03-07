@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'class_query',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
