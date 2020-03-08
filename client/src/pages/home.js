@@ -55,20 +55,22 @@ class Home extends React.Component {
         edificio: null,
         aula: null,
         profesor: null
-      }
+      },
+      edificios: {}
     };
-
-    this.baseState = this.state;
 
     this.iterateObject = this.iterateObject.bind(this);
     this.viewRender = this.viewRender.bind(this);
     this.algortitmo = this.algortitmo.bind(this);
     this.saveDocument = this.saveDocument.bind(this);
+    this.acomodar = this.acomodar.bind(this);
   }
 
   componentDidMount() {
     //this.props.loadUser();
     // eslint-disable-next-line
+
+    this.baseState = this.state;
   }
 
   showFile = async e => {
@@ -97,7 +99,6 @@ class Home extends React.Component {
       var text1 = text;
       var number = 0;
 
-      console.log(text);
       if (text === null) {
         return;
       }
@@ -478,7 +479,9 @@ class Home extends React.Component {
     for (const item of this.array_json) {
       if (!map.has(item[i])) {
         map.set(item[i], true); // set any value to Map
-        result.push(item);
+        if (item[i] !== null && item[i] !== undefined && item[i] !== "") {
+          result.push(item);
+        }
       }
     }
 
@@ -529,9 +532,24 @@ class Home extends React.Component {
     doc.save("Test.pdf");
   }
 
+  acomodar() {
+    const { edificio } = this.state.atributes;
+    const { setAlert } = this.props;
+
+    const { edificios } = this.state;
+
+    if (edificio === null) {
+      setAlert("No Se Encuentran Edificios", "danger", 3000);
+      return;
+    }
+    edificio.map(i => {
+      edificios[i.edificio] = [];
+    });
+    console.log(edificios);
+  }
+
   render() {
     const { name_atributes, atributes } = this.state;
-    console.log(atributes);
     return (
       <>
         <div className="content">
@@ -638,7 +656,12 @@ class Home extends React.Component {
           </Row>
           <Row md="12" className="ml-auto mr-auto mt-5">
             <Col md="12" className="ml-auto mr-auto mt-5 text-center">
-              <Button className="btn-fill" color="primary" type="submit">
+              <Button
+                className="btn-fill"
+                color="primary"
+                type="submit"
+                onClick={this.acomodar}
+              >
                 Modificar
               </Button>
             </Col>
