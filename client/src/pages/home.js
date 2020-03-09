@@ -58,7 +58,8 @@ class Home extends React.Component {
       },
       edificios: {},
       aulas: [],
-      errors: []
+      errors: [],
+      loading: ""
     };
 
     this.iterateObject = this.iterateObject.bind(this);
@@ -89,6 +90,7 @@ class Home extends React.Component {
     };
     try {
       reader.readAsText(e.target.files[0]);
+      this.setState({ loading: "Cargando Document" });
     } catch (error) {
       this.setState(this.baseState);
       setAlert("Error Not Such File", "danger");
@@ -105,6 +107,7 @@ class Home extends React.Component {
       if (text === null) {
         return;
       }
+      this.setState({ loading: "Validando" });
       for (const c of text1) {
         number += 1;
         if (Number(c)) {
@@ -124,6 +127,8 @@ class Home extends React.Component {
   }
 
   async iterateObject(text1) {
+    this.setState({ loading: "Comparando Dobles" });
+
     var aux = text1.split("\n");
 
     for (let i = 0; i < aux.length; i++) {
@@ -142,7 +147,8 @@ class Home extends React.Component {
 
     this.setState(
       {
-        array_json: this.array_json
+        array_json: this.array_json,
+        loading: ""
       },
       () => {
         this.viewRender();
@@ -673,6 +679,7 @@ class Home extends React.Component {
                   err: "Horario En Conflicto",
                   err_data: edificios[obj.edificio][i].nrc
                 });
+                console.log(obj);
                 return false;
               }
             }
@@ -685,7 +692,7 @@ class Home extends React.Component {
   }
 
   render() {
-    const { name_atributes, atributes } = this.state;
+    const { name_atributes, atributes, loading } = this.state;
     return (
       <>
         <div className="content">
@@ -710,6 +717,15 @@ class Home extends React.Component {
               </Card>
             </Col>
           </Row>
+          {loading === "" ? (
+            <Fragment></Fragment>
+          ) : (
+            <Row>
+              <Col md="6" className="ml-auto mr-auto mt-5">
+                <h4 className="description">{loading}</h4>
+              </Col>
+            </Row>
+          )}
           {atributes.profesor !== null ? (
             <Row>
               <Col md="6" className="ml-auto mr-auto mt-5">
