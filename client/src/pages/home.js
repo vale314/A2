@@ -56,7 +56,9 @@ class Home extends React.Component {
         aula: null,
         profesor: null
       },
-      edificios: {}
+      edificios: {},
+      aulas: [],
+      errors: []
     };
 
     this.iterateObject = this.iterateObject.bind(this);
@@ -64,6 +66,7 @@ class Home extends React.Component {
     this.algortitmo = this.algortitmo.bind(this);
     this.saveDocument = this.saveDocument.bind(this);
     this.acomodar = this.acomodar.bind(this);
+    this.finder = this.finder.bind(this);
   }
 
   componentDidMount() {
@@ -124,8 +127,15 @@ class Home extends React.Component {
     var aux = text1.split("\n");
 
     for (let i = 0; i < aux.length; i++) {
-      this.object(aux[i]);
+      var count = 0;
+      var index1 = text1.indexOf(aux[i]);
+      var index2 = text1.indexOf(aux[i], index1 + 1);
+
+      if (index2 <= 0) {
+        this.object(aux[i]);
+      }
     }
+
     this.array_json.pop();
 
     console.log(this.array_json);
@@ -140,7 +150,7 @@ class Home extends React.Component {
     );
   }
 
-  object(text1) {
+  async object(text1) {
     var aux = new Object();
 
     //tomamos el primer numero hasta la coma
@@ -194,13 +204,32 @@ class Home extends React.Component {
 
     //-MATERIA
     //tomamos el primer numero hasta la coma
-    aux.materia = text1.split(",")[0];
+    var materia = "";
+    materia = text1.substring(0, 1);
 
-    //remplazamos el string encontrado con ''
-    text1 = text1.replace(aux.materia, "");
+    if (!materia.localeCompare('"')) {
+      //eliminamos la '"'
+      text1 = text1.substring(1, text1.length);
 
-    //eliminamos la ','
-    text1 = text1.substring(1, text1.length);
+      aux.materia = text1.split('"')[0];
+
+      //remplazamos el string encontrado con ''
+      text1 = text1.replace(aux.materia, "");
+
+      //eliminamos la '"'
+      text1 = text1.substring(1, text1.length);
+
+      //eliminamos la ','
+      text1 = text1.substring(1, text1.length);
+    } else {
+      aux.materia = text1.split(",")[0];
+
+      //remplazamos el string encontrado con ''
+      text1 = text1.replace(aux.materia, "");
+
+      //eliminamos la ','
+      text1 = text1.substring(1, text1.length);
+    }
 
     //-HRS_TEORIA
     //tomamos el primer numero hasta la coma
@@ -457,7 +486,8 @@ class Home extends React.Component {
       //remplazamos el string encontrado con ''
       text1 = text1.replace(aux.nivel, "");
     }
-
+    aux.err = "";
+    aux.err_data = "";
     this.array_json.push(aux);
   }
 
@@ -533,19 +563,125 @@ class Home extends React.Component {
   }
 
   acomodar() {
-    const { edificio } = this.state.atributes;
+    const { edificio, aula } = this.state.atributes;
     const { setAlert } = this.props;
 
-    const { edificios } = this.state;
+    const { edificios, errors } = this.state;
+
+    /*const dias = {
+      L: {},
+      M: {},
+      I: {},
+      J: {},
+      V: {},
+      S: {}
+    };*/
+
+    /*const hrs = [
+      "700",
+      "855",
+      "900",
+      "955",
+      "1000",
+      "1055",
+      "1100",
+      "1155",
+      "1200",
+      "1255",
+      "1300",
+      "1355",
+      "1400",
+      "1455",
+      "1500",
+      "1555",
+      "1600",
+      "1655",
+      "1700",
+      "1755",
+      "1800",
+      "1855",
+      "1900",
+      "1955",
+      "2000",
+      "2055"
+    ];*/
+
+    edificio.map(i => {
+      edificios[i.edificio] = [];
+    });
+
+    this.array_json.map(i => {
+      if (this.finder(i)) {
+        edificios[i.edificio].push(i);
+      }
+    });
 
     if (edificio === null) {
       setAlert("No Se Encuentran Edificios", "danger", 3000);
       return;
     }
-    edificio.map(i => {
-      edificios[i.edificio] = [];
-    });
+    console.log("erros", errors);
     console.log(edificios);
+  }
+
+  finder(obj) {
+    const days = [
+      "class_on_monday",
+      "class_on_tuesday",
+      "class_on_wednesday",
+      "class_on_thursday",
+      "class_on_friday",
+      "class_on_saturday"
+    ];
+    const { errors, edificios } = this.state;
+
+    if (obj.edificio === "") {
+      errors.push({ ...obj, err: "No Edificio", err_data: "" });
+      return false;
+    }
+
+    if (obj.aula === "") {
+      errors.push({ ...obj, err: "No Aula", err_data: "" });
+      return false;
+    }
+
+    if (obj.nrc === "") {
+      errors.push({ ...obj, err: "No Nrc", err_data: "" });
+      return false;
+    }
+
+    if (obj.clave === "") {
+      errors.push({ ...obj, err: "No Clave", err_data: "" });
+      return false;
+    }
+
+    if (edificios[obj.edificio].length < 1) {
+      return true;
+    }
+
+    for (var i = 0; i < edificios[obj.edificio].length; i++) {
+      if (edificios[obj.edificio][i].aula === obj.aula) {
+        days.map(j => {
+          if (obj[j] !== "") {
+            if (obj[j] === edificios[obj.edificio][i][j]) {
+              if (
+                obj.ini <= edificios[obj.edificio][i].fin &&
+                obj.fin >= edificios[obj.edificio][i].ini
+              ) {
+                errors.push({
+                  ...obj,
+                  err: "Horario En Conflicto",
+                  err_data: edificios[obj.edificio][i].nrc
+                });
+                return false;
+              }
+            }
+          }
+        });
+      }
+    }
+
+    return true;
   }
 
   render() {
