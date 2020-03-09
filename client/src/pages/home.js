@@ -132,13 +132,7 @@ class Home extends React.Component {
     var aux = text1.split("\n");
 
     for (let i = 0; i < aux.length; i++) {
-      var count = 0;
-      var index1 = text1.indexOf(aux[i]);
-      var index2 = text1.indexOf(aux[i], index1 + 1);
-
-      if (index2 <= 0) {
-        this.object(aux[i]);
-      }
+      this.object(aux[i], text1);
     }
 
     this.array_json.pop();
@@ -156,7 +150,14 @@ class Home extends React.Component {
     );
   }
 
-  async object(text1) {
+  async object(text1, text2) {
+    var index1 = text2.indexOf(text1);
+    var index2 = text2.indexOf(text1, index1 + 1);
+
+    if (index2 >= 0) {
+      return;
+    }
+
     var aux = new Object();
 
     //tomamos el primer numero hasta la coma
@@ -679,7 +680,6 @@ class Home extends React.Component {
                   err: "Horario En Conflicto",
                   err_data: edificios[obj.edificio][i].nrc
                 });
-                console.log(obj);
                 return false;
               }
             }
