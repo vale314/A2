@@ -225,20 +225,32 @@ class Table extends React.Component {
                   accessor: "nrc"
                 },
                 {
-                  Header: "ST",
-                  accessor: "st"
+                  Header: "Clave",
+                  accessor: "clave"
+                },
+                {
+                  Header: "Seccion",
+                  accessor: "secc"
                 },
                 {
                   Header: "Departamento",
                   accessor: "departamento"
                 },
                 {
-                  Header: "Clave",
-                  accessor: "clave"
-                },
-                {
                   Header: "Materia",
                   accessor: "materia"
+                },
+                {
+                  Header: "Edificio",
+                  accessor: "edificio"
+                },
+                {
+                  Header: "Aula",
+                  accessor: "aula"
+                },
+                {
+                  Header: "Error",
+                  accessor: "err"
                 },
                 {
                   Header: "Actions",
@@ -328,20 +340,28 @@ class Table extends React.Component {
                       accessor: "nrc"
                     },
                     {
-                      Header: "ST",
-                      accessor: "st"
+                      Header: "Clave",
+                      accessor: "clave"
+                    },
+                    {
+                      Header: "Seccion",
+                      accessor: "secc"
                     },
                     {
                       Header: "Departamento",
                       accessor: "departamento"
                     },
                     {
-                      Header: "Clave",
-                      accessor: "clave"
-                    },
-                    {
                       Header: "Materia",
                       accessor: "materia"
+                    },
+                    {
+                      Header: "Edificio",
+                      accessor: "edificio"
+                    },
+                    {
+                      Header: "Aula",
+                      accessor: "aula"
                     },
                     {
                       Header: "Actions",
