@@ -123,31 +123,28 @@ def delete_previous_records(sender, instance, **kwargs):
 
 def find_incoherences(sender, instance, **kwargs):
     # get incoherent records saved previously
-    colliding_records = Record.objects.exclude(pk=instance.pk)
+    colliding_records = Record.objects.all()
     colliding_records = colliding_records.filter(start_time__gte=instance.start_time)
     colliding_records = colliding_records.filter(start_time__lte=instance.end_time)
     colliding_records = colliding_records.filter(building=instance.building)
     colliding_records = colliding_records.filter(classroom=instance.classroom)
 
     # only get records that happen on those same days
-    colliding_records = colliding_records.filter((instance.class_on_monday & Q(class_on_monday=True))
-                                              | (instance.class_on_tuesday & Q(class_on_tuesday=True))
-                                              | (instance.class_on_wednesday & Q(class_on_wednesday=True))
-                                              | (instance.class_on_thursday & Q(class_on_thursday=True))
-                                              | (instance.class_on_friday & Q(class_on_friday=True))
-                                              | (instance.class_on_saturday & Q(class_on_saturday=True)))
+    colliding_records = colliding_records.filter((Q(class_on_monday=instance.class_on_monday) & Q(class_on_monday=True))
+                                              | (Q(class_on_tuesday=instance.class_on_tuesday) & Q(class_on_tuesday=True))
+                                              | (Q(class_on_wednesday=instance.class_on_wednesday) & Q(class_on_wednesday=True))
+                                              | (Q(class_on_thursday=instance.class_on_thursday) & Q(class_on_thursday=True))
+                                              | (Q(class_on_friday=instance.class_on_friday) & Q(class_on_friday=True))
+                                              | (Q(class_on_saturday=instance.class_on_saturday) & Q(class_on_saturday=True)))
     if colliding_records.count():
         # see if collision already exists
         collision_queryset = Incoherence.objects.filter(incoherent_fields='collision')
-        collision_queryset = incoherence_queryset.prefetch_related('records')
+        collision_queryset = collision_queryset.prefetch_related('records')
 
         relevant_collision = None
 
         for collision in collision_queryset:
-            print("Collision: ")
-            print(collision)
-            if list(collision.records) == list(colliding_records):
-                print("Found relevant_collision")
+            if list(collision.records.all()) == list(colliding_records):
                 relevant_collision = collision
                 relevant_collision.records.add(instance)
                 break
@@ -157,7 +154,8 @@ def find_incoherences(sender, instance, **kwargs):
             incoherence = Incoherence()
             incoherence.incoherent_fields = 'collision'
             incoherence.message = 'Existe una colisión entre los horarios de estas clases y el salón en el que se encuentran'
-            incoherence.records.add(colliding_records)
+            incoherence.save()
+            incoherence.records.add(*colliding_records)
 
 # post_save signal for FileUpload that calls upload_file
 post_save.connect(parse_file, sender=FileUpload)
@@ -165,3 +163,4 @@ post_save.connect(parse_file, sender=FileUpload)
 pre_save.connect(delete_previous_records, sender=FileUpload)
 
 # post_save signal for Records for detecting incoherences
+post_save.connect(find_incoherences, sender=Record)
