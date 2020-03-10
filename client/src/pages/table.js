@@ -29,7 +29,6 @@ class Table extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      array_json: {},
       errors: [],
       pageTabs: ""
     };
@@ -40,8 +39,6 @@ class Table extends React.Component {
     ) {
       props.location.edificios = [];
     }
-
-    console.log(props);
 
     this.changeActiveTab = this.changeActiveTab.bind(this);
     this.saveDocument = this.saveDocument.bind(this);
@@ -201,7 +198,7 @@ class Table extends React.Component {
   }
 
   render() {
-    const { errors } = this.state;
+    const { errors } = this.props.location.state;
 
     const { edificios, array_json } = this.props.location.state;
     return (
