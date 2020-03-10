@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 import uuid
 import os
 import csv
@@ -124,10 +124,10 @@ def delete_previous_records(sender, instance, **kwargs):
 def find_incoherences(sender, instance, **kwargs):
     # get incoherent records saved previously
     colliding_records = Record.objects.all()
-    colliding_records = colliding_records.filter(start_time__gte=instance.start_time)
-    colliding_records = colliding_records.filter(start_time__lte=instance.end_time)
     colliding_records = colliding_records.filter(building=instance.building)
     colliding_records = colliding_records.filter(classroom=instance.classroom)
+    colliding_records = colliding_records.filter(start_time__lte=instance.end_time)
+    colliding_records = colliding_records.filter(end_time__gte=instance.start_time)
 
     # only get records that happen on those same days
     colliding_records = colliding_records.filter((Q(class_on_monday=instance.class_on_monday) & Q(class_on_monday=True))
@@ -144,13 +144,15 @@ def find_incoherences(sender, instance, **kwargs):
         relevant_collision = None
 
         for collision in collision_queryset:
-            if list(collision.records.all()) == list(colliding_records):
+            # check if colliding records in given collision are the same that
+            # are present in current collision
+            if set(collision.records.all()) == set(colliding_records.exclude(pk=instance.pk)):
                 relevant_collision = collision
                 relevant_collision.records.add(instance)
                 break
 
         # otherwise, if incoherence hasn't been detected before
-        if not relevant_collision:
+        if relevant_collision is None:
             incoherence = Incoherence()
             incoherence.incoherent_fields = 'collision'
             incoherence.message = 'Existe una colisión entre los horarios de estas clases y el salón en el que se encuentran'
@@ -164,3 +166,5 @@ pre_save.connect(delete_previous_records, sender=FileUpload)
 
 # post_save signal for Records for detecting incoherences
 post_save.connect(find_incoherences, sender=Record)
+
+@receiver(post_delete, sender=Incoherence)
