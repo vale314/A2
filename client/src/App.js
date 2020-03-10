@@ -19,6 +19,7 @@ import Navbar from "./layout/nabvar";
 import PrivateRoute from "./routing/privateRoute";
 import Home from "./pages/home.js";
 import Register from "./pages/register";
+import Table from "./pages/table";
 import Footer from "./layout/footer";
 
 const hist = createBrowserHistory();
@@ -45,6 +46,7 @@ class App extends React.Component {
             />
 
             <PrivateRoute path="/admin/home" exact component={Home} />
+            <PrivateRoute path="/admin/home/table" exact component={Table} />
           </Switch>
         </Router>
         <Footer />

@@ -573,7 +573,7 @@ class Home extends React.Component {
     const { edificio, aula } = this.state.atributes;
     const { setAlert } = this.props;
 
-    const { edificios, errors } = this.state;
+    const { edificios, errors, name_atributes } = this.state;
 
     /*const dias = {
       L: {},
@@ -613,6 +613,10 @@ class Home extends React.Component {
       "2055"
     ];*/
 
+    if (edificio === [] || edificio === null) {
+      return setAlert("Error Not Such File", "danger");
+    }
+
     edificio.map(i => {
       edificios[i.edificio] = [];
     });
@@ -629,6 +633,16 @@ class Home extends React.Component {
     }
     console.log("erros", errors);
     console.log(edificios);
+
+    this.props.history.push({
+      pathname: "/admin/home/table",
+      state: {
+        array_json: edificios,
+        errors: errors,
+        edificios: edificio,
+        name_atributes
+      }
+    });
   }
 
   finder(obj) {
