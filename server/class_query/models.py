@@ -7,6 +7,7 @@ import csv
 from django.utils import timezone
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
+from .managers import CustomUserManager
 
 class User(AbstractUser):
     db_table='auth_user'
@@ -15,7 +16,8 @@ class User(AbstractUser):
     is_staff = models.BooleanField(default=False)
     email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'password', 'is_staff']
+    REQUIRED_FIELDS = ['name']
+    objects = CustomUserManager()
 
 
 class Record(models.Model):
