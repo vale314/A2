@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from class_query.models import FileUpload, Record, Incoherence
 from django.conf import settings
+from .models import User
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -15,7 +16,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = settings.AUTH_USER_MODEL
+        model = User
         fields = ['id', 'name', 'email', 'is_staff']
 
 
