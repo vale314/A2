@@ -1,11 +1,21 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db.models.signals import post_save, pre_save, post_delete
 import uuid
 import os
 import csv
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    db_table='auth_user'
+    name = models.TextField(max_length=50)
+    phone = models.TextField(max_length=15)
+    is_staff = models.BooleanField(default=False)
+    email = models.EmailField(unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'password', 'is_staff']
 
 
 class Record(models.Model):
@@ -56,7 +66,11 @@ class FileUpload(models.Model):
     uploaded_at = models.DateTimeField(auto_now=True)
     finished_parsing_at = models.DateTimeField(null=True)
     file = models.FileField(upload_to=get_upload_location)
-    uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    uploader = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False
+    )
 
 def parse_file(sender, instance, **kwargs):
     # only run this if file is not already parsed
