@@ -15,7 +15,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'is_staff']
+        fields = ['id', 'username', 'email', 'is_staff']
 
 class RecordSerializer(serializers.ModelSerializer):
     class Meta:

@@ -166,5 +166,3 @@ pre_save.connect(delete_previous_records, sender=FileUpload)
 
 # post_save signal for Records for detecting incoherences
 post_save.connect(find_incoherences, sender=Record)
-
-@receiver(post_delete, sender=Incoherence)

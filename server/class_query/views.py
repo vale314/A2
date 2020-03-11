@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
@@ -59,3 +60,36 @@ def search_records(request):
         records = Record.objects.all()
         serializer = RecordSerializer(records, many=True)
         return Response(serializer.data)
+
+@api_view(['GET'])
+def list_admins(request):
+    records = User.objects.filter(is_staff=True)
+    serializer = UserSerializer(records, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def list_users(request):
+    records = User.objects.filter(is_staff=False)
+    serializer = UserSerializer(records, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def show_current_user(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def create_user(request):
+    user = User()
+    user_form_data = request.POST
+    if (user_form_data.is_valid()):
+        user.username = user_form_data['name']
+        user.email = user_form_data['email']
+        user.password = user_form_data['password']
+        try:
+            user.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except:
+            return JsonResponse({'msg': "Datos de identificación ya usados por otro usuario"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    else:
+        return JsonResponse({'msg': "Datos de identificación inválidos"}, status=status.HTTP_400_NOT_ACCEPTABLE)
