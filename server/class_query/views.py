@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from class_query.models import FileUpload, Record
-from class_query.serializers import UserSerializer, FileUploadSerializer, RecordSerializer
+from class_query.models import *
+from class_query.serializers import *
 
 
 class FileUploadList(APIView):
@@ -44,6 +44,11 @@ class FileUploadDetail(APIView):
         file_upload.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view(['GET'])
+def show_collisions(request):
+    collisions = Incoherence.objects.filter(incoherent_fields='collision')
+    serializer = IncoherenceSerializer(collisions, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 def search_records(request):

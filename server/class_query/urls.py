@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/file', views.FileUploadList.as_view()),
     path('admin/file/<int:pk>', views.FileUploadDetail.as_view()),
     path('record', views.search_records),
+    path('collisions', views.show_collisions),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
