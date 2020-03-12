@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://USUARIO:PASSWORD@actividad2-s6cpt.mongodb.net/test?retryWrites=true&w=majority",
+  "jwtSecret": "secret"
+}

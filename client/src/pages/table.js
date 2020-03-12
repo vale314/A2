@@ -47,7 +47,7 @@ class Table extends React.Component {
 
   componentDidMount() {
     const { array_json, errors } = this.props.location.state;
-    //this.props.loadUser();
+    this.props.loadUser();
     // eslint-disable-next-line
     this.setState({
       array_json,
@@ -61,50 +61,6 @@ class Table extends React.Component {
       [tabState]: tadName
     });
   };
-
-  /*saveDocument(name = "") {
-    const { errors } = this.state;
-    const { name_atributes } = this.props.location.state;
-
-    var doc = new jsPDF();
-
-    doc.text(20, 20, "Reporte");
-
-    var numberx = 5;
-    var numbery = 60;
-
-    var incrementox = 45;
-    var incrementoy = 10;
-
-    errors.map(i => {
-      name_atributes.map(j => {
-        doc.text(numberx, numbery, j);
-        numberx = numberx + j.length * j.length;
-
-        if (numberx > 180) {
-          numberx = incrementox;
-          numbery = numbery + incrementoy;
-        }
-
-        doc.text(numberx, numbery, i[j]);
-        numberx = incrementox + i[j].length * i[j].length;
-
-        if (numberx > 180) {
-          numberx = incrementox;
-          numbery = numbery + incrementoy;
-        }
-
-        if (numbery >= 220) {
-          doc.addPage();
-          //reset
-          numberx = 45;
-          numbery = numbery = 60;
-        }
-      });
-    });
-
-    doc.save("Test.pdf");
-  }*/
 
   saveDocument() {
     const { errors } = this.props.location.state;

@@ -71,8 +71,8 @@ class Home extends React.Component {
   }
 
   componentDidMount() {
-    //this.props.loadUser();
-    // eslint-disable-next-line
+    this.props.loadUser();
+    //eslint-disable-next-line
 
     this.baseState = this.state;
   }
@@ -570,48 +570,10 @@ class Home extends React.Component {
   }
 
   acomodar() {
-    const { edificio, aula } = this.state.atributes;
+    const { edificio } = this.state.atributes;
     const { setAlert } = this.props;
 
     const { edificios, errors, name_atributes } = this.state;
-
-    /*const dias = {
-      L: {},
-      M: {},
-      I: {},
-      J: {},
-      V: {},
-      S: {}
-    };*/
-
-    /*const hrs = [
-      "700",
-      "855",
-      "900",
-      "955",
-      "1000",
-      "1055",
-      "1100",
-      "1155",
-      "1200",
-      "1255",
-      "1300",
-      "1355",
-      "1400",
-      "1455",
-      "1500",
-      "1555",
-      "1600",
-      "1655",
-      "1700",
-      "1755",
-      "1800",
-      "1855",
-      "1900",
-      "1955",
-      "2000",
-      "2055"
-    ];*/
 
     if (edificio === [] || edificio === null) {
       return setAlert("Error Not Such File", "danger");

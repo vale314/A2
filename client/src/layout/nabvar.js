@@ -80,7 +80,7 @@ class navbar extends React.Component {
         this.props.history.push({
           pathname: "/"
         });
-        localStorage.removeItem("tokenAdmin");
+        localStorage.removeItem("tokenUser");
         break;
       case "/user/logout":
         this.setState({

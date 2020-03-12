@@ -44,7 +44,7 @@ export const register = formData => dispatch => {
   };
 
   axios
-    .post("/api/user", formData, config)
+    .post("/api/auth/register", formData, config)
 
     .then(res => {
       dispatch({

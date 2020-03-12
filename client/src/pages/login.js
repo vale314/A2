@@ -42,14 +42,22 @@ class Login extends React.Component {
 
     this.props.loadUser();
     if (isAuthenticated) {
-      this.props.history.push("/user/home");
+      this.props.history.push("/admin/home");
     }
   }
   componentWillUnmount() {
     document.body.classList.toggle("login-page");
   }
 
-  componentWillUpdate(nextProps, nextState) {}
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.isAuthenticated) {
+      this.props.history.push("/admin/home");
+    }
+    if (nextProps.error) {
+      this.props.setAlert(nextProps.error, "danger", 3000);
+      this.props.clearErrors();
+    }
+  }
 
   onChange(e) {
     const user = this.state.user;
@@ -73,14 +81,14 @@ class Login extends React.Component {
         password
       });
       if (isAuthenticated) {
-        this.props.history.push("/user/home");
+        this.props.history.push("/admin/home");
       }
       if (error) {
         this.props.setAlert("Email Invalido O Contraseña", "danger", 3000);
         this.props.clearErrors();
       }
       if (error === undefined) {
-        this.props.setAlert("Error En Servidor", "danger", 3000);
+        this.props.setAlert("Email Invalido O Contraseña", "danger", 3000);
         this.props.clearErrors();
       }
     }
