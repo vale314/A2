@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from class_query.models import FileUpload, Record
-from django.contrib.auth.models import User
+from class_query.models import FileUpload, Record, Incoherence
+from django.conf import settings
+from .models import User
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -12,12 +13,21 @@ class FileUploadSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return FileUpload.objects.create(**validated_data)
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'is_staff']
+        fields = ['id', 'name', 'email', 'is_staff']
+
 
 class RecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Record
+        fields = '__all__'
+
+
+class IncoherenceSerializer(serializers.ModelSerializer):
+    records = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    class Meta:
+        model = Incoherence
         fields = '__all__'

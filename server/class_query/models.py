@@ -1,10 +1,23 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save, pre_save
+from django.conf import settings
+from django.db.models.signals import post_save, pre_save, post_delete
 import uuid
 import os
 import csv
 from django.utils import timezone
+from django.db.models import Q
+from django.contrib.auth.models import AbstractUser
+from .managers import CustomUserManager
+
+class User(AbstractUser):
+    db_table='auth_user'
+    name = models.TextField(max_length=50)
+    phone = models.TextField(max_length=15)
+    is_staff = models.BooleanField(default=False)
+    email = models.EmailField(unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
+    objects = CustomUserManager()
 
 
 class Record(models.Model):
@@ -39,6 +52,13 @@ class Record(models.Model):
     level = models.TextField(max_length=5)
 
 
+class Incoherence(models.Model):
+    records = models.ManyToManyField(Record)
+    # To be parsed as JSON
+    incoherent_fields = models.TextField(max_length=50)
+    message = models.TextField(max_length=100)
+
+
 class FileUpload(models.Model):
     def get_upload_location(self, filename):
         ext = filename.split('.')[-1]
@@ -48,7 +68,11 @@ class FileUpload(models.Model):
     uploaded_at = models.DateTimeField(auto_now=True)
     finished_parsing_at = models.DateTimeField(null=True)
     file = models.FileField(upload_to=get_upload_location)
-    uploader = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    uploader = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False
+    )
 
 def parse_file(sender, instance, **kwargs):
     # only run this if file is not already parsed
@@ -92,7 +116,7 @@ def parse_file(sender, instance, **kwargs):
                 new_record.start_date = "-".join(reversed(row[24].split('/')))
             else:
                 new_record.start_date = "2020-10-10"
-                
+
             if len(row[25]):
                 new_record.end_date = "-".join(reversed(row[25].split('/')))
             else:
@@ -101,18 +125,60 @@ def parse_file(sender, instance, **kwargs):
             new_record.level = row[26]
 
             new_record.save()
+
     # logs datetime at the time file finishes parsing
     instance.finished_parsing_at = timezone.now()
     instance.save(update_fields=['finished_parsing_at'])
 
 def delete_previous_records(sender, instance, **kwargs):
     # only deletes objects if new FileUpload
-    if (not instance.pk): 
+    if (not instance.pk):
         Record.objects.all().delete()
+        # also delete all Incoherences since they don't apply anymore
+        Incoherence.objects.all().delete()
 
-"""
-post_save signal for FileUpload that calls upload_file
-"""
+def find_incoherences(sender, instance, **kwargs):
+    # get incoherent records saved previously
+    colliding_records = Record.objects.all()
+    colliding_records = colliding_records.filter(building=instance.building)
+    colliding_records = colliding_records.filter(classroom=instance.classroom)
+    colliding_records = colliding_records.filter(start_time__lte=instance.end_time)
+    colliding_records = colliding_records.filter(end_time__gte=instance.start_time)
+
+    # only get records that happen on those same days
+    colliding_records = colliding_records.filter((Q(class_on_monday=instance.class_on_monday) & Q(class_on_monday=True))
+                                              | (Q(class_on_tuesday=instance.class_on_tuesday) & Q(class_on_tuesday=True))
+                                              | (Q(class_on_wednesday=instance.class_on_wednesday) & Q(class_on_wednesday=True))
+                                              | (Q(class_on_thursday=instance.class_on_thursday) & Q(class_on_thursday=True))
+                                              | (Q(class_on_friday=instance.class_on_friday) & Q(class_on_friday=True))
+                                              | (Q(class_on_saturday=instance.class_on_saturday) & Q(class_on_saturday=True)))
+    if colliding_records.count():
+        # see if collision already exists
+        collision_queryset = Incoherence.objects.filter(incoherent_fields='collision')
+        collision_queryset = collision_queryset.prefetch_related('records')
+
+        relevant_collision = None
+
+        for collision in collision_queryset:
+            # check if colliding records in given collision are the same that
+            # are present in current collision
+            if set(collision.records.all()) == set(colliding_records.exclude(pk=instance.pk)):
+                relevant_collision = collision
+                relevant_collision.records.add(instance)
+                break
+
+        # otherwise, if incoherence hasn't been detected before
+        if relevant_collision is None:
+            incoherence = Incoherence()
+            incoherence.incoherent_fields = 'collision'
+            incoherence.message = 'Existe una colisión entre los horarios de estas clases y el salón en el que se encuentran'
+            incoherence.save()
+            incoherence.records.add(*colliding_records)
+
+# post_save signal for FileUpload that calls upload_file
 post_save.connect(parse_file, sender=FileUpload)
 # Delete all previously saved records when a new file is uploaded
 pre_save.connect(delete_previous_records, sender=FileUpload)
+
+# post_save signal for Records for detecting incoherences
+post_save.connect(find_incoherences, sender=Record)
