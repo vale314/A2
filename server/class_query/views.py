@@ -45,6 +45,20 @@ class FileUploadDetail(APIView):
         file_upload.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@api_view(['POST'])
+def upload_records(request):
+    records = request.POST['records']
+
+    if len(records) == 0:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    for record in json.loads(records):
+        try:
+            Record.create(record)
+        except:
+            return Response(status=status.HTTP_500)
+    return Response(status=status.HTTP_201_CREATED)
+
 @api_view(['GET'])
 def show_collisions(request):
     collisions = Incoherence.objects.filter(incoherent_fields='collision')
