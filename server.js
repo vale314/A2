@@ -6,14 +6,17 @@ const server = require("http").createServer(app);
 
 const path = require("path");
 
+process.env.UV_THREADPOOL_SIZE = 64;
+
 // Connect Database
 connectDB();
 
 // Init Middleware
-app.use(express.json({ extended: false }));
+app.use(express.json({ extended: false, limit: "5mb" }));
 
 // Define Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/register", require("./routes/register"));
 
 // Serve static assets in production
 if (process.env.NODE_ENV === "production") {

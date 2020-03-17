@@ -5,9 +5,12 @@ import { Launcher } from "react-chat-window";
 import { connect } from "react-redux";
 import { loadUser, clearErrors } from "../actions/authActions";
 import { setAlert } from "../actions/alertActions";
+import { text_save } from "../actions/textActions";
 import { withRouter } from "react-router-dom";
 
 import jsPDF from "jspdf";
+
+import axios from "axios";
 
 // reactstrap components
 import {
@@ -68,7 +71,41 @@ class Home extends React.Component {
     this.saveDocument = this.saveDocument.bind(this);
     this.acomodar = this.acomodar.bind(this);
     this.finder = this.finder.bind(this);
+    this.saveAll = this.saveAll.bind(this);
   }
+
+  saveAll() {
+    const { array_json } = this.state;
+    const { text } = this.props;
+
+    console.log(text);
+
+    if (array_json === []) {
+      return setAlert("No Se Encuentran Registros", "danger", 3000);
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    axios
+      .post("/api/register/all", { text, array_json }, config)
+      .then(res => {
+        setAlert("Correctamente", "success", 3000);
+      })
+      .catch(err => {
+        setAlert("Correctamente", "danger", 3000);
+      });
+  }
+
+  changeActiveTab = (e, tabState, tadName) => {
+    e.preventDefault();
+    this.setState({
+      [tabState]: tadName
+    });
+  };
 
   componentDidMount() {
     this.props.loadUser();
@@ -108,6 +145,8 @@ class Home extends React.Component {
         return;
       }
       this.setState({ loading: "Validando" });
+      console.log(text);
+      this.props.text_save({ text });
       for (const c of text1) {
         number += 1;
         if (Number(c)) {
@@ -569,7 +608,8 @@ class Home extends React.Component {
     doc.save("Test.pdf");
   }
 
-  acomodar() {
+  async acomodar() {
+    this.saveAll();
     const { edificio } = this.state.atributes;
     const { setAlert } = this.props;
 
@@ -798,7 +838,7 @@ class Home extends React.Component {
                 type="submit"
                 onClick={this.acomodar}
               >
-                Modificar
+                Deteccion De Colisiones
               </Button>
             </Col>
           </Row>
@@ -810,11 +850,13 @@ class Home extends React.Component {
 
 const mapStateToProps = store => ({
   isAuthenticated: store.auth.isAuthenticated,
-  user: store.auth.user
+  user: store.auth.user,
+  text: store.text.text
 });
 
 export default connect(mapStateToProps, {
   loadUser,
   setAlert,
-  clearErrors
+  clearErrors,
+  text_save
 })(withRouter(Home));

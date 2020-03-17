@@ -8,6 +8,8 @@ import { connect } from "react-redux";
 
 import jsPDF from "jspdf";
 
+import axios from "axios";
+
 // reactstrap components
 import {
   Row,
@@ -43,6 +45,7 @@ class Table extends React.Component {
     this.changeActiveTab = this.changeActiveTab.bind(this);
     this.saveDocument = this.saveDocument.bind(this);
     this.saveDocumentCorrect = this.saveDocumentCorrect.bind(this);
+    this.saveAll = this.saveAll.bind(this);
   }
 
   componentDidMount() {
@@ -53,6 +56,34 @@ class Table extends React.Component {
       array_json,
       errors
     });
+  }
+
+  saveAll() {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    const { edificios, array_json } = this.props.location.state;
+    const { text } = this.props;
+
+    if (array_json === []) {
+      setAlert("No Se Encuentran Registros", "danger", 3000);
+    }
+
+    axios
+      .post(
+        "/api/register",
+        { array_json: array_json, edificios: edificios, text: text },
+        config
+      )
+      .then(res => {
+        setAlert("Correctamente", "success", 3000);
+      })
+      .catch(err => {
+        setAlert("Error Server", "danger", 3000);
+      });
   }
 
   changeActiveTab = (e, tabState, tadName) => {
@@ -242,6 +273,18 @@ class Table extends React.Component {
             </Button>
           </Col>
         </Row>
+        <Row className="mt-3">
+          <Col md="1" className="ml-auto mr-auto">
+            <Button
+              className="btn-fill"
+              color="primary"
+              type="submit"
+              onClick={this.saveAll}
+            >
+              Save All
+            </Button>
+          </Col>
+        </Row>
         <Row>
           <Col className="ml-auto mr-auto" md="8">
             <Card className="card-plain card-subcategories">
@@ -362,7 +405,8 @@ class Table extends React.Component {
 
 const mapStateToProps = store => ({
   isAuthenticated: store.auth.isAuthenticated,
-  user: store.auth.user
+  user: store.auth.user,
+  text: store.text.text
 });
 
 export default connect(mapStateToProps, {
