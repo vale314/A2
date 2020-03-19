@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const { check, validationResult } = require("express-validator");
 
-const Register = require("../models/register");
+const Register = require("../models/Register");
 const Edificio = require("../models/Edificio");
 const RegisterAll = require("../models/ResgisterAll");
 const Text = require("../models/Text");
